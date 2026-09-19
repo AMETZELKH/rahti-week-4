@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Rahti Week 4</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Visitor Counter</h1>
+
+<div class="card">
+    <h2>Application status</h2>
+
+    <p>
+        MySQL server time:
+        <span id="time" class="value">Loading...</span>
+    </p>
+
+    <p>
+        Page views:
+        <span id="views" class="value">Loading...</span>
+    </p>
+
+    <button id="visitButton">
+        Count visits
+    </button>
+
+    <p id="message"></p>
+</div>
+
+<div class="card">
+
+    <h2>Documentation</h2>
+
+    <h3>Application</h3>
+
+    <p>
+        This application is a simple visitor counter running on Rahti.
+        The frontend communicates with a backend REST API, and the backend
+        reads and writes data in a MySQL database.
+    </p>
+
+    <h3>Architecture</h3>
+
+    <pre>
+Internet
+   |
+   v
+Frontend Route
+   |
+Frontend Service
+   |
+Frontend Pod
+   |
+Backend Service
+   |
+Backend Pod
+   |
+MySQL Service
+   |
+MySQL Pod
+   |
+Persistent Storage
+    </pre>
+
+    <h3>Frontend → Backend → MySQL</h3>
+
+    <p>
+        The displayed MySQL server time comes from SELECT NOW().
+        The page-view counter is stored in MySQL and updated through
+        the backend REST API.
+    </p>
+
+    <h3>Database persistence</h3>
+
+    <p>
+        This section will contain the results of the MySQL Pod restart
+        experiment.
+    </p>
+
+    <h3>Pod recovery</h3>
+
+    <p>
+        This section will contain the results of deleting the backend Pod.
+    </p>
+
+    <h3>Scaling</h3>
+
+    <p>
+        This section will contain the results of scaling the backend
+        to multiple replicas.
+    </p>
+
+    <h3>Application update</h3>
+
+    <p>
+        This section will contain the results of updating the application
+        from version 1.0.0 to version 1.0.1.
+    </p>
+
+    <h3>Problems and solutions</h3>
+
+    <p>
+        Problems encountered during the deployment and how they were solved
+        will be documented here.
+    </p>
+
+    <h3>Docker Compose vs Rahti</h3>
+
+    <p>
+        The previous Docker Compose deployment ran containers using a
+        Docker network and Docker volumes. In Rahti, Kubernetes resources
+        such as Deployments, Services, Routes and PersistentVolumeClaims
+        manage the application, networking and storage.
+    </p>
+
+</div>
+
+<script>
+
+async function loadInfo() {
+
+    try {
+
+        const response = await fetch("/api/info");
+
+        if (!response.ok) {
+            throw new Error("API request failed");
+        }
+
+        const data = await response.json();
+
+        document.getElementById("time").textContent = data.time;
+        document.getElementById("views").textContent = data.pageViews;
+
+    } catch (error) {
+
+        document.getElementById("message").textContent =
+            "Could not load application data.";
+
+        console.error(error);
+    }
+}
+
+document
+    .getElementById("visitButton")
+    .addEventListener("click", async () => {
+
+        try {
+
+            const response = await fetch("/api/visit", {
+                method: "POST"
+            });
+
+            if (!response.ok) {
+                throw new Error("Visit request failed");
+            }
+
+            const data = await response.json();
+
+            document.getElementById("views").textContent =
+                data.pageViews;
+
+            document.getElementById("message").textContent =
+                "Your visit was counted.";
+
+        } catch (error) {
+
+            document.getElementById("message").textContent =
+                "Could not count your visit.";
+
+            console.error(error);
+        }
+    });
+
+loadInfo();
+
+</script>
+
+</body>
+</html>

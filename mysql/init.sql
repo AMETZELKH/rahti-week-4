@@ -1,0 +1,12 @@
+CREATE DATABASE IF NOT EXISTS visitor_db;
+
+USE visitor_db;
+
+CREATE TABLE IF NOT EXISTS stats (
+    id INT PRIMARY KEY,
+    page_views INT NOT NULL DEFAULT 0
+);
+
+INSERT INTO stats (id, page_views)
+VALUES (1, 0)
+ON DUPLICATE KEY UPDATE id = id;
