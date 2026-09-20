@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: yaki4/rahti-frontend:1.0
+          image: yaki4/rahti-frontend:1.0.1
 
           ports:
             - containerPort: 3000

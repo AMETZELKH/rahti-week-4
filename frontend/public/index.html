@@ -43,7 +43,7 @@
 
 <body>
 
-<h1>Visitor Counter</h1>
+<h1>Visitor Counter V2</h1>
 
 <div class="card">
     <h2>Application status</h2>
@@ -76,57 +76,78 @@
         The frontend communicates with a backend REST API, and the backend
         reads and writes data in a MySQL database.
     </p>
+    <p><img src="https://a3s.fi/rahti-week4/week4-apply.png"/></p>
 
     <h3>Frontend - Backend - Database</h3>
 
     <p>
-        The frontend communicates with the backend through the Kubernetes Service backend. 
-        The backend connects to MySQL through the mysql Service. The application was tested by 
-        creating and retrieving data through the frontend. The returned data confirms that the 
-        request travelled through the frontend and backend and was stored in MySQL.
+        The frontend communicates with the backend through the backend Service. 
+        The backend queries and updates the MySQL database. This is demonstrated 
+        by the page view counter: clicking “Count visits” changes the value stored in MySQL 
+        and the updated value is displayed by the frontend.
     </p>
+    <p><img src="https://a3s.fi/rahti-week4/week4-f-b-d.png"/></p>
+    <p><img src="https://a3s.fi/rahti-week4/week4-f-b-d-2.png"/></p>
 
     <h3>Database persistence</h3>
 
     <p>
-        This section will contain the results of the MySQL Pod restart
-        experiment.
+        The MySQL Pod was deleted and automatically recreated by the Deployment. The page view counter retained its previous value, 
+        demonstrating that the database data is stored on persistent storage rather than only inside the Pod.
     </p>
+    <p><img src="https://a3s.fi/rahti-week4/week4-db.png"/></p>
+    <p><img src="https://a3s.fi/rahti-week4/week4-db2.png"/></p>
 
     <h3>Pod recovery</h3>
 
     <p>
-        This section will contain the results of deleting the backend Pod.
+        A backend Pod was manually deleted. The Deployment automatically created a replacement Pod. 
+        After the replacement became Ready, the application continued to work normally.
     </p>
+    <p><img src="https://a3s.fi/rahti-week4/week4-rec.png"/></p>
 
     <h3>Scaling</h3>
 
     <p>
-        This section will contain the results of scaling the backend
-        to multiple replicas.
+        The backend Deployment was scaled from 1 replica to 3 replicas using oc scale. 
+        Kubernetes created two additional backend Pods. The frontend continued to access 
+        the backend through the Service, so it did not need to know the individual Pod addresses.
     </p>
+    <p><img src="https://a3s.fi/rahti-week4/week4-sc.png"/></p>
+    <p><img src="https://a3s.fi/rahti-week4/week4-sc(2).png"/></p>
 
     <h3>Application update</h3>
 
     <p>
-        This section will contain the results of updating the application
-        from version 1.0.0 to version 1.0.1.
+        The screenshots and content of documentation part were not be added at the first deployment aka version 1, and as you can see on the page now, it was be updated.
     </p>
+    <p><img src="https://a3s.fi/rahti-week4/week4-place.png"/></p>
 
     <h3>Problems and solutions</h3>
 
     <p>
-        Problems encountered during the deployment and how they were solved
-        will be documented here.
+        The init of mysql was not be executed correctly at first, so I delete the old database and deploy the mysql-delpoyment again to solve this problem.
     </p>
 
     <h3>Docker Compose vs Rahti</h3>
 
     <p>
-        The previous Docker Compose deployment ran containers using a
-        Docker network and Docker volumes. In Rahti, Kubernetes resources
-        such as Deployments, Services, Routes and PersistentVolumeClaims
-        manage the application, networking and storage.
+        With Docker Compose, the three containers were defined and managed together on a single Docker host. 
+        Networking was created through the Compose network and persistent storage was attached directly to the 
+        database container.
+    </p>
+    <p>
+        In Rahti, the application is split into Kubernetes Deployments and Services. 
+        Services provide stable internal DNS names such as backend and db, while Pods can be recreated or 
+        scaled independently. The frontend is exposed externally through an OpenShift Route. Database storage 
+        is provided through a PersistentVolumeClaim, and configuration and credentials are managed separately 
+        using ConfigMaps and Secrets.
+    </p>
+    <p>
+        SO the main change is not simply the configuration-file format. Rahti changes how the application 
+        is deployed and managed. Kubernetes continuously manages the desired number of Pods, provides 
+        service discovery, supports scaling and automatic Pod recovery, and separates persistent storage and 
+        configuration from individual containers.
     </p>
 
 </div>
