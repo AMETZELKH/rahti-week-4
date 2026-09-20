@@ -1,19 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend 
+  name: frontend
+
 spec:
-  replicas: 1 
+  replicas: 1
+
   selector:
     matchLabels:
       app: frontend
+
   template:
     metadata:
-    labels:
-      app: frontend
+      labels:
+        app: frontend
+
     spec:
       containers:
         - name: frontend
           image: yaki4/rahti-frontend:1.0
+
           ports:
-            - containerPort: 8080
+            - containerPort: 3000
+
+          env:
+            - name: BACKEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: BACKEND_URL

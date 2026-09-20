@@ -2,8 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: db
+
 spec:
   replicas: 1
+
+  strategy:
+    type: Recreate
 
   selector:
     matchLabels:
@@ -26,7 +30,7 @@ spec:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: app-secret
                   key: MYSQL_ROOT_PASSWORD
 
             - name: MYSQL_DATABASE
@@ -44,14 +48,22 @@ spec:
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: app-secret
                   key: MYSQL_PASSWORD
 
           volumeMounts:
             - name: mysql-storage
               mountPath: /var/lib/mysql
 
+            - name: mysql-init
+              mountPath: /docker-entrypoint-initdb.d/init.sql
+              subPath: init.sql
+
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:
             claimName: mysql-data
+            
+        - name: mysql-init
+          configMap:
+          name: mysql-init

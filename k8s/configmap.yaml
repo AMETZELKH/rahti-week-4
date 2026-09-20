@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: app-config
 data:
-DB HOST: "db"
-DB USER: "appuser"
-DB NAME: "appdb"
+  DB_HOST: "db"
+  DB_PORT: "3306"
+  DB_USER: "appuser"
+  DB_NAME: "visitor_db"
+  BACKEND_URL: "http://backend:8080"

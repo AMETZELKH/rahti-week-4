@@ -16,7 +16,7 @@ spec:
         - name: backend
           image: yaki4/rahti-backend:1.0 
           ports:
-            - containerPort: 8000
+            - containerPort: 8080
           env:
             - name: DB HOST
               valueFrom:
