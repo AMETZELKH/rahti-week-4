@@ -77,35 +77,13 @@
         reads and writes data in a MySQL database.
     </p>
 
-    <h3>Architecture</h3>
-
-    <pre>
-Internet
-   |
-   v
-Frontend Route
-   |
-Frontend Service
-   |
-Frontend Pod
-   |
-Backend Service
-   |
-Backend Pod
-   |
-MySQL Service
-   |
-MySQL Pod
-   |
-Persistent Storage
-    </pre>
-
-    <h3>Frontend → Backend → MySQL</h3>
+    <h3>Frontend - Backend - Database</h3>
 
     <p>
-        The displayed MySQL server time comes from SELECT NOW().
-        The page-view counter is stored in MySQL and updated through
-        the backend REST API.
+        The frontend communicates with the backend through the Kubernetes Service backend. 
+        The backend connects to MySQL through the mysql Service. The application was tested by 
+        creating and retrieving data through the frontend. The returned data confirms that the 
+        request travelled through the frontend and backend and was stored in MySQL.
     </p>
 
     <h3>Database persistence</h3>

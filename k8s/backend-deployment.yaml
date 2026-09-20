@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: backend 
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: backend 
+  template: 
+    metadata:
+      labels:
+        app: backend 
+    spec:
+      containers:
+        - name: backend
+          image: yaki4/rahti-backend:1.0 
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB HOST
+            - name: DB USER 
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB USER
+            - name: DB NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config 
+                  key: DB NAME
+            - name: DB PASSWORD
+              valueFrom:
+                secretKeyRef:
+                name: mysql-secret
+                key: DB PASSWORD
