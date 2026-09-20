@@ -65,4 +65,4 @@ spec:
 
         - name: mysql-init
           configMap:
-          name: mysql-init
+            name: mysql-init
