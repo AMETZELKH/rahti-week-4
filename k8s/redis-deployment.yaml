@@ -22,3 +22,12 @@ spec:
               cpu: 50m
             limits:
               cpu: 100m
+
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data
