@@ -26,6 +26,12 @@ spec:
           ports:
             - containerPort: 3306
 
+          resources:
+            requests:
+              cpu: 100m
+            limits:
+              cpu: 200m
+
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
