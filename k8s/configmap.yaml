@@ -8,3 +8,5 @@ data:
   DB_USER: "appuser"
   DB_NAME: "visitor_db"
   BACKEND_URL: "http://backend:8080"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"

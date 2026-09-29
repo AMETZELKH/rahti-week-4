@@ -20,6 +20,33 @@ const pool = mysql.createPool({
     connectionLimit: 10
 });
 
+
+// Redis configuration
+const redisClient = createClient({
+    socket: {
+        host: process.env.REDIS_HOST || "localhost",
+        port: Number(process.env.REDIS_PORT || 6379)
+    }
+});
+
+redisClient.on("error", (error) => {
+    console.error("Redis error:", error);
+});
+
+async function startServer() {
+    try {
+        await redisClient.connect();
+        console.log("Connected to Redis");
+
+        app.listen(PORT, "0.0.0.0", () => {
+            console.log(`Backend listening on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error("Failed to start backend:", error);
+        process.exit(1);
+    }
+}
+
 app.get("/api/health", async (req, res) => {
     try {
         await pool.query("SELECT 1");
@@ -32,16 +59,46 @@ app.get("/api/health", async (req, res) => {
 
 app.get("/api/info", async (req, res) => {
     try {
-        const [timeRows] = await pool.query("SELECT NOW() AS currentTime");
+        // Check Redis cache first
+        const cached = await redisClient.get("api:info");
+
+        if (cached) {
+            console.log("Cache hit: /api/info");
+
+            return res.json({
+                ...JSON.parse(cached),
+                source: "redis"
+            });
+        }
+
+        console.log("Cache miss: /api/info");
+
+        // Cache miss: query MySQL
+        const [timeRows] = await pool.query(
+            "SELECT NOW() AS currentTime"
+        );
 
         const [counterRows] = await pool.query(
             "SELECT page_views AS pageViews FROM stats WHERE id = 1"
         );
 
-        res.json({
+        const data = {
             time: timeRows[0].currentTime,
             pageViews: counterRows[0].pageViews
+        };
+
+        // Store result in Redis for 30 seconds
+        await redisClient.setEx(
+            "api:info",
+            30,
+            JSON.stringify(data)
+        );
+
+        res.json({
+            ...data,
+            source: "mysql"
         });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -60,9 +117,13 @@ app.post("/api/visit", async (req, res) => {
             "SELECT page_views AS pageViews FROM stats WHERE id = 1"
         );
 
+        // Invalidate cached /api/info data
+        await redisClient.del("api:info");
+
         res.json({
             pageViews: rows[0].pageViews
         });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -70,6 +131,7 @@ app.post("/api/visit", async (req, res) => {
         });
     }
 });
+
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Backend listening on port ${PORT}`);
