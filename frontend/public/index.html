@@ -38,6 +38,16 @@
             padding: 15px;
             overflow-x: auto;
         }
+
+        a {
+            color: #1769aa;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        
     </style>
 </head>
 
@@ -65,7 +75,7 @@
     <p id="message"></p>
 </div>
 
-<div class="card">
+<!-- <div class="card">
 
     <h2>Documentation</h2>
 
@@ -150,6 +160,146 @@
         configuration from individual containers.
     </p>
 
+</div> -->
+
+<div class="card">
+
+    <h2>Part A Questions</h2>
+
+    <h3>1.Explain the difference between SAML and OAuth. When would a company choose one over the other?</h3>
+
+    <p>
+        SAML and Oauth solve different problems. SAML, aka Security Assertion Markup Language, is an XML-based framework 
+        for exchanging information about authentication, attributes, and authorization between different systems. It is 
+        commonly used for Single Sign-On, especially in enterprise environments, such as that a company could use one identity 
+        provider for its employees and allow employees to access several business applications without having to log in 
+        separately to each application. SAML allows the identity provider to send an authentication assertion to the service 
+        provider, which can then trust that the user has been authenticated.
+    </p>
+    <p>
+        OAuth has a different main purpose. It is an authorization framework that allows a third-party application to obtain 
+        limited access to an HTTP service on behalf of a user, without requiring the application to know the user's password. 
+        For example, a calendar application could ask a user for permission to access their Google Calendar. The user grants 
+        permission, and the application receives a token that can be used to access the allowed resources.
+    </p>
+    <p>
+        The main difference can be described as identity and enterprise SSO versus delegated access to resources. A company 
+        might choose SAML when it needs employees to sign in to multiple enterprise applications through a central identity 
+        provider. OAuth is more suitable when an application needs to access another service or API on behalf of a user. For 
+        modern web login systems, OAuth is often combined with OpenID Connect, which adds an identity layer on top of OAuth.
+    </p>
+
+
+    <h3>2. What is a Web Application Firewall (WAF) and what kinds of attacks does it defend against? Where would you place one in the three-container architecture you built in Week 4?</h3>
+
+    <p>
+        A Web Application Firewall (WAF) is a security layer that monitors and filters HTTP and HTTPS traffic going to a web application. Unlike a traditional network firewall, which mainly controls network traffic based on things such as IP addresses and ports, a WAF is designed to understand web application traffic. It can inspect HTTP requests and apply rules to identify potentially malicious requests. A WAF can help protect against common attacks such as Cross-Site Scripting (XSS) and SQL injection. Imagine a login form in a web application. An attacker may try to use SQL injection by putting malicious SQL-related input into a form field. If the backend constructs SQL queries insecurely, this could allow the attacker to access or modify database information. But a WAF can inspect the incoming HTTP request and potentially recognize a known malicious pattern and block the request before it reaches the application.
+    </p>
+    <p>
+        In the Week 4 architecture, WAF could be placed at the public entry point of the application. The advantage of this position is that incoming web requests can be inspected before they reach the application services. If a request matches a rule for a common attack, the WAF can block it instead of forwarding it to the frontend or backend. This provides an additional security layer between the public Internet and the application. But also, a WAF should not be considered a replacement for secure programming. It can reduce the risk of some attacks, but it cannot guarantee that an application is secure.
+    </p>
+
+
+    <h3>3.What is YAML and why has it become the default configuration format for Kurbernetes/Rahti manifests? Compare it briefly to JSON.</h3>
+
+    <p>
+        YAML is a human-readable format for representing structured data and configuration. It is widely used with Kubernetes because Kubernetes applications can be described using configuration files, often called manifests. A Kubernetes manifest can describe the desired state of an application, including information such as the container image, number of replicas, ports and other settings. Kubernetes uses these configurations to understand what state the developer wants the application to have.
+    </p>
+    <p>
+        One reason YAML is convenient for Kubernetes is that it is relatively easy for humans to read and edit. YAML uses indentation to represent relationships between different fields, so a configuration can be written without a large amount of punctuation. A simple Kubernetes Deployment can contain fields such as apiVersion, kind, metadata and spec. The spec can then contain information about the containers that should run. 
+    </p>
+    <p>
+        JSON can represent the same structured information. Kubernetes supports both YAML and JSON configuration files. JSON is widely used for communication between programs and APIs, while YAML is often more comfortable for people to write and maintain as configuration.
+    </p>
+
+
+    <h3>4.Explain a peer-to-peer VPN is used for, and how it differs from a traditional site-to-site VPN.</h3>
+
+    <p>
+        A peer-to-peer (P2P) VPN is used to create a private, encrypted connection directly between individual devices or nodes, allowing them to communicate as if they were connected to the same private network. Instead of requiring all traffic to pass through a central VPN server, the devices can establish connections with each other through the VPN system. This is useful when users need secure access to another device or service without exposing it directly to the public internet. A developer could use a P2P VPN to securely connect their laptop to a home server while travelling, or several remote users could connect their devices to form a private virtual network.
+    </p>
+    <p>
+        A traditional site-to-site VPN is designed to connect entire networks rather than individual devices. If a company have an office network in Helsinki and another office network in London, a site-to-site VPN can create an encrypted tunnel between the two office routers or gateways, allowing devices on the Helsinki network to communicate with devices on the London network as though the two networks were connected.
+    </p>
+    <p>
+        The main difference is therefore what is being connected. A P2P VPN mainly connects individual devices or peers directly, whereas a site-to-site VPN connects two or more complete networks through their gateways. P2P VPNs are particularly useful for distributed users and devices that may be located on different networks, while site-to-site VPNs are commonly used to connect fixed organizational networks. Another important difference is the connection model. In a P2P VPN, communication can be established between the participating peers without requiring all traffic to travel through a central VPN gateway. In a site-to-site VPN, traffic between the connected networks normally passes through the VPN gateways at each site.
+    </p>
+
+    <h3>A short reflection: what security or reliability concern (WAF, OAuth token handling, rate limiting, cache invalidation) would matter if this went to production?</h3>
+
+    <p>
+        In production, cache invalidation would be an important reliability concern. If the backend updates the MySQL database but the corresponding Redis value is not invalidated or refreshed, /api/info could return stale data. A production implementation should define an appropriate TTL and invalidate or update the cache whenever the underlying database value changes.
+    </p>
+
+    <h2>Part B Exercise</h2>
+
+    <h3>This week update</h3>
+    <p>
+        I extended the existing Week 4 application by adding Redis as a new component. I created a separate Redis Deployment and Service and configured the backend to communicate with Redis using the internal redis Service. The Redis connection settings were added to the existing ConfigMap, while sensitive database credentials continued to be stored in the Secret. I updated the backend code and package.json to support Redis, rebuilt the backend Docker image, and deployed the new image to Rahti.
+    </p>
+    <p><img src="https://a3s.fi/rahti-week-5/redis-pods.png" width="600"/></p>
+    <p><img src="https://a3s.fi/rahti-week-5/redis-svc.png" width="600"/></p>
+    <p><img src="https://a3s.fi/rahti-week-5/redis-deploy.png" width="600"/></p>
+    <p><img src="https://a3s.fi/rahti-week-5/redis-api.png" width="600"/></p>
+
+    <h3>Problems and solutions</h3>
+
+    <p>
+        The new backend Pod could not be created because the Rahti project had reached its 4 CPU quota. The existing containers had automatically received a 500m CPU limit through the project's LimitRange.
+    </p>
+    <p><img src="https://a3s.fi/rahti-week-5/redis-error.png" width="600"/></p>
+    <p>
+        To solve this, I inspected the ReplicaSet events and LimitRange, then explicitly configured lower CPU requests and limits for the Deployments. After applying the updated manifests, the new backend Pod was created successfully and the complete application, including the new Redis Deployment and Service, was running normally.
+    </p>
+    <p><img src="https://a3s.fi/rahti-week-5/redis-limit.png" width="600"/></p>
+
+</div>
+
+<div class="card">
+    <h2>References</h2>
+
+    <ul>
+    <li>
+        <a href="https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf">
+            SAML
+        </a>
+    </li>
+    <li>
+        <a href="https://datatracker.ietf.org/doc/rfc6749/">
+            OAuth
+        </a>
+    </li>
+    <li>
+        <a href="https://en.wikipedia.org/wiki/Web_application_firewall">
+            Web application firewall
+        </a>
+    </li>
+    <li>
+        <a href="https://community.owasp.org/attacks/SQL_Injection">
+            SQL Injection
+        </a>
+    </li>
+    <li>
+        <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/" target="_blank">
+            Kubernetes Objects
+        </a>
+    </li>
+    <li>
+        <a href="https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/" target="_blank">
+            Kubernetes Management
+        </a>
+    </li>
+    <li>
+        <a href="https://docs.manage.security.cisco.com/cdfmc/c_about_s2s_vpns.html" target="_blank">
+            Site-to-site VPN
+        </a>
+    </li>
+    <li>
+        <a href="https://www.cisco.com/site/us/en/learn/topics/security/what-is-a-virtual-private-network-vpn.html" target="_blank">
+            What is a VPN
+        </a>
+    </li>
+    </ul>
 </div>
 
 <script>
