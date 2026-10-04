@@ -292,47 +292,71 @@
 </div>
 
 <div class="card">
+
+    <h2>Part B Exercise</h2>
+
+    <p>
+        I already had a GitHub Actions workflow from the previous work. For this assignment, I verified that a push to main builds and pushes a new image and updates the deployment on Rahti. Github YAML file can be checked in repository.
+    </p>
+    <p><img src="https://a3s.fi/rahti-week-6/wk-git.png" width="600"/></p>
+
+    <p>
+        And as request asks, I deliberately changed the readiness probe endpoint to an invalid path. 
+        The probe consequently returned HTTP 404, which caused the Pod to become NotReady. 
+        The container itself remained Running, but it was removed from the Service's available endpoints. 
+        This demonstrates that a readiness probe controls whether a Pod receives traffic rather than whether 
+        the container should be restarted.
+    </p>
+    <p><img src="https://a3s.fi/rahti-week-6/wk-pods.png" width="600"/></p>
+    <p><img src="https://a3s.fi/rahti-week-6/wk-wrong.png" width="600"/></p>
+    <p><img src="https://a3s.fi/rahti-week-6/wk-error.png" width="600"/></p>
+    <p><img src="https://a3s.fi/rahti-week-6/wk-check1.png" width="600"/></p>
+    <p><img src="https://a3s.fi/rahti-week-6/wk-check2.png" width="600"/></p>
+
+    <p>Short reflection<p>
+    <p>
+        The backend logs each request path, status code and response time. In a real system, I would not alert on every single 
+        error because this could cause alert fatigue. Instead, I would trigger an alert if, such as more than 5 percent of 
+        requests return 5xx errors over five minutes, or if the backend stays unready for several minutes. These conditions 
+        are more likely to indicate a real problem that needs attention.
+    </p>
+
+    <p>A sample of logs: </p>
+    <p><img src="https://a3s.fi/rahti-week-6/wk-logs.png" width="600"/></p>
+</div>
+
+<div class="card">
     <h2>References</h2>
 
     <ul>
     <li>
-        <a href="https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf">
-            SAML
+        <a href="https://docs.github.com/en/actions/get-started/continuous-integration">
+            Github Docs - Continuous integration
         </a>
     </li>
     <li>
-        <a href="https://datatracker.ietf.org/doc/rfc6749/">
-            OAuth
+        <a href="https://docs.github.com/en/actions/get-started/continuous-deployment">
+            Github Docs - Continuous deployment
         </a>
     </li>
     <li>
-        <a href="https://en.wikipedia.org/wiki/Web_application_firewall">
-            Web application firewall
+        <a href="https://www.atlassian.com/continuous-delivery/principles/continuous-integration-vs-delivery-vs-deployment">
+            Continuous integration vs. delivery vs. deployment
         </a>
     </li>
     <li>
-        <a href="https://community.owasp.org/attacks/SQL_Injection">
-            SQL Injection
+        <a href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax">
+            Github Docs - Workflow syntax for GitHub Actions
         </a>
     </li>
     <li>
-        <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/" target="_blank">
-            Kubernetes Objects
+        <a href="https://docs.github.com/en/actions/reference/security/secrets">
+            Github Docs - Secrets reference
         </a>
     </li>
     <li>
-        <a href="https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/" target="_blank">
-            Kubernetes Management
-        </a>
-    </li>
-    <li>
-        <a href="https://docs.manage.security.cisco.com/cdfmc/c_about_s2s_vpns.html" target="_blank">
-            Site-to-site VPN
-        </a>
-    </li>
-    <li>
-        <a href="https://www.cisco.com/site/us/en/learn/topics/security/what-is-a-virtual-private-network-vpn.html" target="_blank">
-            What is a VPN
+        <a href="https://docs.github.com/en/actions/reference/security/secure-use/" target="_blank">
+            Github Docs - Secure use reference
         </a>
     </li>
     </ul>
