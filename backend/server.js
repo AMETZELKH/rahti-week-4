@@ -7,6 +7,20 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
 
+app.use((req, res, next) => {
+    const start = Date.now();
+
+    res.on("finish", () => {
+        const duration = Date.now() - start;
+        console.log(
+            `${req.method} ${req.path} ${res.statusCode} ${duration}ms`
+        );
+    });
+
+    next();
+});
+
+
 const dbConfig = {
     host: process.env.DB_HOST || "localhost",
     port: Number(process.env.DB_PORT || 3306),
@@ -56,6 +70,10 @@ app.get("/api/health", async (req, res) => {
         console.error(error);
         res.status(500).json({ status: "error" });
     }
+});
+
+app.get("/healthz", (req, res) => {
+    res.json({ status: "ok" });
 });
 
 app.get("/api/info", async (req, res) => {
@@ -133,8 +151,6 @@ app.post("/api/visit", async (req, res) => {
     }
 });
 
-startServer();
 
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Backend listening on port ${PORT}`);
-});
+
+startServer();

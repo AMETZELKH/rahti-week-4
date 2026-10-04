@@ -162,7 +162,7 @@
 
 </div> -->
 
-<div class="card">
+<!-- <div class="card">
 
     <h2>Part A Questions</h2>
 
@@ -252,6 +252,42 @@
         To solve this, I inspected the ReplicaSet events and LimitRange, then explicitly configured lower CPU requests and limits for the Deployments. After applying the updated manifests, the new backend Pod was created successfully and the complete application, including the new Redis Deployment and Service, was running normally.
     </p>
     <p><img src="https://a3s.fi/rahti-week-5/redis-limit.png" width="600"/></p>
+
+</div> -->
+
+<div class="card">
+    
+    <h2>Part A Questions</h2>
+
+    <h3>1.Explain the difference between Continuous Integration, Continuous Delivery and Continuous Deployment.</h3>
+    <p>
+        Continuous Integration (CI), Continuous Delivery, and Continuous Deployment are related ideas in software development, but they describe different stages of automating the path from source code to a running application. Continuous Integration is mainly about frequently integrating code changes into a shared repository and automatically building and testing those changes. The purpose is to find problems early instead of discovering them after many changes have accumulated, like in a GitHub Actions workflow, every push to the main branch could trigger a build that creates a new container image and runs tests. 
+        And Continuous Delivery means that the application is kept in a state where it can be released to production or another environment at any time. The build, tests, and packaging are automated, but the final deployment may still require a human decision. Continuous Deployment goes further by automatically deploying every change that passes the required checks. There is no manual approval step between a successful pipeline and deployment. In my project, a push to main can trigger GitHub Actions to build the backend container, push it to a registry, and update the backend Deployment in Rahti. 
+        The main difference is therefore how far the automation goes. CI automates integration and verification, Continuous Delivery makes a verified release ready to deploy, and Continuous Deployment automatically performs the deployment.
+    </p>
+
+    <h3>2.Describe the structure of a GitHub Actions workflow. What would a minimal pipeline for the app you built in Week 4/5 need to do?</h3>
+    <p>
+        A GitHub Actions workflow is a YAML file that describes when an automated process should run and what it should do. The three important structural parts are triggers, jobs, and steps. A trigger defines an event that starts the workflow, such as a push to the main branch. A job is a group of tasks that runs on a GitHub Actions runner, while steps are the individual commands or actions executed inside that job. 
+        A simple deployment workflow for my application could be triggered by a push to main. The first steps could check out the repository and build the backend Docker image. The next step could authenticate to the container registry and push the image. Finally, the workflow could log into Rahti and use oc set image to update the backend Deployment. The Deployment would then create a new Pod using the new image. 
+        And for a minimal pipeline for my application, the pipeline logs into the cluster and directly tells it what image to use. This is straightforward and easy to understand, but the CI system needs needs to do more than just run a successful build. It needs to take the source code all the way to a real deployment. Conceptually, the pipeline would be: git push - GitHub Actions - build container image - push image to registry - update Rahti Deployment - new Pod starts.
+    </p>
+
+    <h3>3.What is alert fatigue, and how would you design a small set of alerts for a student project that avoids it?</h3>
+    <p>
+        Alert fatigue happens when a system produces too many alerts, especially alerts that are not actionable or are caused by minor temporary problems. When developers or operators receive too many notifications, they may start ignoring them, which makes it easier to miss a genuinely important incident. For a small student project, I would therefore avoid creating an alert for every individual error. It is like, one HTTP 500 response should probably not immediately generate an alert because occasional errors can happen even when the application is working normally. Instead, I could create an alert if the backend returns 5xx errors for more than a certain percentage of requests over a five-minute period.
+    </p>
+    <p>
+        Another useful alert could be based on the readiness state of the application. If the backend remains unready for several minutes, that would be more important than a single failed health check. For a student project, I would keep the alert set small, like one alert for sustained application errors and one for a backend that remains unavailable. This is more useful than creating alerts for every log message or every temporary failure.
+    </p>
+
+    <h3>4.Why should secrets never be hard-coded into a CI/CD pipeline file? How does GitHub Actions handle this instead?</h3>
+    <p>
+        Secrets such as registry passwords, API tokens, and Rahti cluster credentials should never be hard-coded into a CI/CD workflow because the workflow file is part of the source code repository. Anyone who has access to the repository could potentially see the credentials, and once a secret has been committed to Git it can remain in the repository's history even after the visible line is removed.
+    </p>
+    <p>
+        GitHub Actions provides repository or environment secrets for this purpose. Instead of putting the actual token in the YAML file, the workflow can refer to a secret using an expression such as "password: ${{ secrets.REGISTRY_TOKEN }}". The actual value is stored separately in the GitHub repository's Actions secrets configuration. The workflow can use the secret during execution without putting the credential directly into the source code. This is especially important for a deployment pipeline because a Rahti token may have permission to modify resources in the cluster. If that token were accidentally published in a public repository, another person could potentially use it to change or delete resources. Keeping credentials in GitHub Secrets separates the deployment configuration from the sensitive authentication information.
+    </p>
 
 </div>
 
